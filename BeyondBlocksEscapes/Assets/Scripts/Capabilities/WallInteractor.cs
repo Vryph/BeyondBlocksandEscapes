@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using UnityEngine;
 
 namespace BBE {
@@ -7,7 +8,7 @@ namespace BBE {
     {
         [Header("Wall Slide")]
         [SerializeField] private bool _activateWallSlide = true;
-        [SerializeField, Range(0.1f, 5f)] private float _wallSlideMaxSpeed = 2f;
+        [SerializeField, Range(0.1f, 10f)] private float _wallSlideMaxSpeed = 2f;
         [SerializeField, Range(0.05f, 0.5f)] private float _wallStickTime = 0.25f;
         [Header("Wall Jump")]
         [SerializeField] private bool _activateWallJump = true;
@@ -59,10 +60,11 @@ namespace BBE {
             }
             #endregion
 
+
             #region Wall Stick
             if (_activateWallSlide)
             {
-                if (_collisionDataRetriever.OnWall && !_collisionDataRetriever.OnGround && !WallJumping)
+                if (_onWall && !_onGround && !WallJumping)
                 {
                     if (_wallStickCounter > 0)
                     {
@@ -103,12 +105,11 @@ namespace BBE {
                     else if (Mathf.Sign(-_wallDirectionX) == Mathf.Sign(_controller.input.RetrieveMoveInput()))
                     {
                         _velocity = new Vector2(_wallJumpClimb.x * _wallDirectionX, _wallJumpClimb.y);
-                    }     
+                    }
                     else
                     {
                         _velocity = new Vector2(_wallJumpLeap.x * _wallDirectionX, _wallJumpLeap.y);
                     }
-
                     WallJumping = true;
                     _desiredJump = false;
                     _isJumpReset = false;
@@ -132,6 +133,7 @@ namespace BBE {
             if(_collisionDataRetriever.OnWall && !_collisionDataRetriever.OnGround && WallJumping)
             {
                 _body.velocity = Vector2.zero;
+                WallJumping = false;
             }
         }
     }

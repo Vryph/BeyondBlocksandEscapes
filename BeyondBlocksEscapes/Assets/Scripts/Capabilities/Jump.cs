@@ -15,17 +15,19 @@ namespace BBE
         private Controller _controller;
         private Rigidbody2D _body;
         private CollisionDataRetrieval _collisionDataRetriever;
+        private RaycastDataRetrieval _raycastDataRetriever;
         private Vector2 _velocity;
 
         private int _jumpPhase;
         private float _defaultGravityScale, _jumpSpeed, _coyoteCounter, _jumpBufferCounter;
 
-        private bool _desiredJump, _onGround, _isJumping, _isJumpReset;
+        private bool _desiredJump, _onGround, _isJumping, _isJumpReset, _ceilingEdgeDetected;
 
         private void Awake()
         {
             _body = GetComponent<Rigidbody2D>();
             _collisionDataRetriever = GetComponent<CollisionDataRetrieval>();
+            _raycastDataRetriever = GetComponent<RaycastDataRetrieval>();
             _controller = GetComponent<Controller>();
 
             _isJumpReset = true;
@@ -85,6 +87,17 @@ namespace BBE
             {
                 _body.gravityScale = _defaultGravityScale;
             }
+
+
+            #region Ceiling Edge Detection
+            if ((!_onGround && _body.velocity.y > 0) || _ceilingEdgeDetected)
+            { 
+                _raycastDataRetriever.CeilingEdgeDetection();
+                _ceilingEdgeDetected = _raycastDataRetriever.CeilingEdgeDetected;
+            }
+            
+
+            #endregion
 
             _body.velocity = _velocity;
         }
