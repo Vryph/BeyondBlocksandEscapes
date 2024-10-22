@@ -18,6 +18,7 @@ namespace BBE
         [SerializeField, Range(0.005f, 0.5f)] private float _ceilingEdgeCorrectionIntensity = 0.1f; //Can just be the same value as Raylenght from raycastDataRetrieval.
 
         private Controller _controller;
+        private Dash _dashInput;
         private Vector2 _direction, _desiredVelocity, _velocity;
         private Rigidbody2D _body;
         private CollisionDataRetrieval _collisionDataRetriever;
@@ -26,10 +27,12 @@ namespace BBE
 
         private float _maxSpeedChange, _acceleration, _particleCounter;
         private bool _onGround, _facingRight, _ceilingEdgeDetected;
+        private bool _isDashing = false;
 
         private void Awake()
         {
             _body = GetComponent<Rigidbody2D>();
+            _dashInput = GetComponent<Dash>();
             _collisionDataRetriever = GetComponent<CollisionDataRetrieval>();
             _raycastDataRetriever = GetComponent<RaycastDataRetrieval>();
             _controller = GetComponent<Controller>();
@@ -49,16 +52,19 @@ namespace BBE
 
         private void FixedUpdate()
         {
+            if(_dashInput != null) { _isDashing = _dashInput.IsDashing;}
             _onGround = _collisionDataRetriever.OnGround;
             _velocity = _body.velocity;
             _ceilingEdgeDetected = _raycastDataRetriever.CeilingEdgeDetected;
 
             #region Handle Movement
 
-            _acceleration = _onGround ? _maxAcceleration : _maxAirAcceleration;
-            _maxSpeedChange = _acceleration * Time.deltaTime;
-            _velocity.x = Mathf.MoveTowards(_velocity.x, _desiredVelocity.x, _maxSpeedChange);
-
+            if (!_isDashing)
+            {
+                _acceleration = _onGround ? _maxAcceleration : _maxAirAcceleration;
+                _maxSpeedChange = _acceleration * Time.deltaTime;
+                _velocity.x = Mathf.MoveTowards(_velocity.x, _desiredVelocity.x, _maxSpeedChange);
+            }
             #endregion
 
             #region Temp Particles
@@ -86,7 +92,7 @@ namespace BBE
             }
 
             #endregion
-
+                
             if (_velocity.x != 0) { _raycastDataRetriever.SetDirection(); } // Handles the direction in the Raycast code
             if (_ceilingEdgeDetected)
             {

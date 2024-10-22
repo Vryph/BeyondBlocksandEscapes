@@ -13,6 +13,7 @@ namespace BBE
         [SerializeField, Range(0, 0.4f)] private float _jumpBufferTime = 0.2f;
 
         private Controller _controller;
+        private Dash _dashInput;
         private Rigidbody2D _body;
         private CollisionDataRetrieval _collisionDataRetriever;
         private RaycastDataRetrieval _raycastDataRetriever;
@@ -22,10 +23,13 @@ namespace BBE
         private float _defaultGravityScale, _jumpSpeed, _coyoteCounter, _jumpBufferCounter;
 
         private bool _desiredJump, _onGround, _isJumping, _isJumpReset, _ceilingEdgeDetected;
+        private bool _isDashing = false;
+
 
         private void Awake()
         {
             _body = GetComponent<Rigidbody2D>();
+            _dashInput = GetComponent<Dash>();
             _collisionDataRetriever = GetComponent<CollisionDataRetrieval>();
             _raycastDataRetriever = GetComponent<RaycastDataRetrieval>();
             _controller = GetComponent<Controller>();
@@ -42,9 +46,13 @@ namespace BBE
         private void FixedUpdate()
         {
             _onGround = _collisionDataRetriever.OnGround;
+            if (_dashInput != null)
+            {
+                _isDashing = _dashInput.IsDashing;
+            }
             _velocity = _body.velocity;
 
-            if (_onGround && _body.velocity.y == 0)
+            if ((_onGround || _isDashing) && _body.velocity.y == 0)
             {
                 _jumpPhase = 0;
                 _coyoteCounter = _coyoteTime;
@@ -95,9 +103,10 @@ namespace BBE
                 _raycastDataRetriever.CeilingEdgeDetection();
                 _ceilingEdgeDetected = _raycastDataRetriever.CeilingEdgeDetected;
             }
-            
+
 
             #endregion
+
 
             _body.velocity = _velocity;
         }

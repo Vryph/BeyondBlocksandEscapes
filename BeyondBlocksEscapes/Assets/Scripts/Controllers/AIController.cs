@@ -14,5 +14,10 @@ namespace BBE
         {
             return 1f;
         }
+
+        public override bool RetrieveDashInput()
+        {
+            return false;
+        }
     }
 }

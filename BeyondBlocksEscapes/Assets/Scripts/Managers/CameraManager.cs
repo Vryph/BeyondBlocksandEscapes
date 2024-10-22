@@ -92,7 +92,7 @@ namespace BBE
             }
             else 
             { 
-                _camera.transform.position = Vector3.Lerp(_camera.transform.position, _defaultPosition, _normalizedTime); 
+                _camera.transform.position = Vector3.Lerp(_camera.transform.position, _defaultPosition, _t); 
             }
 
             if (_camera.transform.position.x < _clampMinValues.x || _camera.transform.position.x > _clampMaxValues.x || _camera.transform.position.y < _clampMinValues.y || _camera.transform.position.y > _clampMaxValues.y)
