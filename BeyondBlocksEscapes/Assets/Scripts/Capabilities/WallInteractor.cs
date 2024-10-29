@@ -15,15 +15,18 @@ namespace BBE {
         [SerializeField] private Vector2 _wallJumpClimb = new Vector2(4f, 12f);
         [SerializeField] private Vector2 _wallJumpBounce = new Vector2(10.7f, 10f);
         [SerializeField] private Vector2 _wallJumpLeap = new Vector2(14f, 12f);
+        [SerializeField, Range(0f, 0.4f)] private float _wallJumpBufferTime = 0.15f;
+
 
 
         private CollisionDataRetrieval _collisionDataRetriever;
         private Rigidbody2D _body;
         private Controller _controller;
+        private Dash _dash;
 
         private Vector2 _velocity;
         private bool _onWall, _onGround, _desiredJump, _isJumpReset;
-        private float _wallStickCounter;
+        private float _wallStickCounter, _wallJumpBufferCounter;
         [HideInInspector] public bool WallJumping { get; private set; }
         private float _wallDirectionX;
 
@@ -32,6 +35,7 @@ namespace BBE {
             _collisionDataRetriever = GetComponent<CollisionDataRetrieval>();
             _body = GetComponent<Rigidbody2D>();
             _controller = GetComponent<Controller>();
+            _dash = GetComponent<Dash>();
 
             _isJumpReset = true;
         }
@@ -50,9 +54,18 @@ namespace BBE {
             _onGround = _collisionDataRetriever.OnGround;
             _wallDirectionX = _collisionDataRetriever.ContactNormal.x;
 
+            if (_onWall)
+            {
+                if (_dash.IsDashing)
+                {
+                    _dash.StopDash();
+                }
+            }
+
             #region Wall Slide
             if (_onWall && _activateWallSlide)
             {
+                _dash.ResetDash();
                 if(_velocity.y < -_wallSlideMaxSpeed)
                 {
                     _velocity.y = -_wallSlideMaxSpeed;
@@ -94,10 +107,34 @@ namespace BBE {
                 WallJumping = false;
             }
 
+
+            if (_desiredJump && _isJumpReset)
+            {
+                _wallJumpBufferCounter = _wallJumpBufferTime;
+                _desiredJump = false;
+                _isJumpReset = false;
+            }
+            else if(_wallJumpBufferCounter > 0)
+            {
+                _wallJumpBufferCounter -= Time.deltaTime;
+            }
+            else if (!_desiredJump)
+            {
+                _isJumpReset = true;
+            }
+
             if (_onWall && !_onGround)
             {
-                if (_desiredJump && _isJumpReset)
+                if(_wallJumpBufferCounter > 0)
                 {
+                    if (_dash.IsDashing)
+                    {
+                        _dash.StopDash();
+                    }
+
+                    WallJumping = true;
+                    _wallJumpBufferCounter = 0;
+
                     if (_controller.input.RetrieveMoveInput() == 0)
                     {
                         _velocity = new Vector2(_wallJumpBounce.x * _wallDirectionX, _wallJumpBounce.y);
@@ -109,14 +146,7 @@ namespace BBE {
                     else
                     {
                         _velocity = new Vector2(_wallJumpLeap.x * _wallDirectionX, _wallJumpLeap.y);
-                    }
-                    WallJumping = true;
-                    _desiredJump = false;
-                    _isJumpReset = false;
-                }
-                else if (!_desiredJump)
-                {
-                    _isJumpReset = true;
+                    }  
                 }
             }
 

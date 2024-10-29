@@ -9,21 +9,15 @@ namespace BBE
         [SerializeField] private float _dashTime = 0.2f;
         [SerializeField] private float _dashCooldownTime = 1f;
 
-        
-
         [SerializeField] private float _scaleReductionMultiplier = 0.5f;
-
-        [Header("Gambiarra")] private float _jumpBufferTime = 0.1f;
-        private float _jumpBufferCounter;
-
 
         private Controller _controller;
         private Rigidbody2D _body;
         private CollisionDataRetrieval _collisionDataRetriever;
 
 
-        [SerializeField]private bool _desiredJump, _desiredDash, _canDash, _onGround, _wasGrounded;
-        private float _dashCounter, _dashCooldownCounter;
+        private bool _desiredDash, _canDash, _onGround, _isDashReset;
+        private float _dashCounter, _dashCooldownCounter, _hInput;
 
         public bool IsDashing { get; private set; }
 
@@ -31,7 +25,7 @@ namespace BBE
         private Vector3 _originalScale;
 
         private void Awake()
-        {
+        { 
             _originalScale = transform.localScale;
             _body = GetComponent<Rigidbody2D>();
             _collisionDataRetriever = GetComponent<CollisionDataRetrieval>();
@@ -41,32 +35,24 @@ namespace BBE
         private void Update()
         {
             SetDirection();
-
-            _desiredJump = _controller.input.RetrieveJumpInput();
             _desiredDash = _controller.input.RetrieveDashInput();
+            
         }
 
         private void FixedUpdate()
         {
             _onGround = _collisionDataRetriever.OnGround;
 
-            if(_desiredDash && _canDash)
+            if(_desiredDash && _canDash && _isDashReset)
             {
                 _dashCounter = _dashTime;
                 _canDash = false;
+                _isDashReset = false;
                 IsDashing = true;
-
-                _jumpBufferCounter = _jumpBufferTime;
             }
-
-            if(_desiredJump && IsDashing && _jumpBufferCounter <= 0)
+            else if (!_desiredDash)
             {
-                StopDash();
-            }
-
-            if (_jumpBufferCounter > 0)
-            {
-                _jumpBufferCounter -= Time.fixedDeltaTime;
+                _isDashReset = true;
             }
 
             if (IsDashing)
@@ -76,26 +62,30 @@ namespace BBE
             else 
             {
                 _dashCooldownCounter -= Time.fixedDeltaTime;
-                if (_onGround && !_canDash)
-                    _wasGrounded = true;
-                if (_dashCooldownCounter < 0 && _wasGrounded)
-                {
-                    _canDash = true;
-                }
             }
 
-            _desiredJump = false;
-
+            if (_onGround)
+                ResetDash();
 
         }
 
         private void DashAction()
         {
+            
             if (_dashCounter > 0)
             {
-                transform.localScale = new Vector3(_originalScale.x, _originalScale.y * _scaleReductionMultiplier, _originalScale.z);
-                _body.velocity = _dashDirection * _dashSpeed;
-                _body.velocity = new Vector2(_body.velocity.x,0);
+                if (_originalScale == transform.localScale)
+                {
+                    transform.localScale = new Vector3(_originalScale.x, _originalScale.y * _scaleReductionMultiplier, _originalScale.z);
+
+                    if (_onGround)
+                    {
+                        float scaleDifferential = _originalScale.y - transform.localScale.y;
+                        transform.position = new Vector3(transform.position.x, transform.position.y - scaleDifferential / 2, transform.position.z);
+                    }
+                }
+
+                _body.velocity = new Vector2(_dashDirection.x * _dashSpeed, 0);
                 _dashCounter -= Time.fixedDeltaTime;
             }
             else
@@ -104,20 +94,37 @@ namespace BBE
             }
         }
 
-        private void StopDash()
+        public void StopDash()
         {
-            transform.localScale = _originalScale;
-            _wasGrounded = false;
-            _dashCounter = 0;
-            _dashCooldownCounter = _dashCooldownTime;
-            IsDashing = false;
+            if (IsDashing)
+            {
+                transform.localScale = _originalScale;
+                _dashCounter = 0;
+                _dashCooldownCounter = _dashCooldownTime;
+                IsDashing = false;
+            }
         }
 
         public void SetDirection()
         {
-            if (_body.velocity.x != 0)
+            if (!IsDashing)
             {
-                _dashDirection = _body.velocity.x < 0 ? new Vector2(-1, 0) : new Vector2(1, 0);
+                _hInput = _controller.input.RetrieveMoveInput();
+                if (_hInput != 0)
+                {
+                    _dashDirection = _hInput < 0 ? new Vector2(-1, 0) : new Vector2(1, 0);
+                }
+            }
+        }
+
+        public void ResetDash()
+        {
+            if (!IsDashing && !_canDash)
+            {
+                if(_dashCooldownCounter < 0)
+                {
+                    _canDash = true;
+                }
             }
         }
     }

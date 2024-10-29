@@ -22,7 +22,9 @@ namespace BBE
         private int _jumpPhase;
         private float _defaultGravityScale, _jumpSpeed, _coyoteCounter, _jumpBufferCounter;
 
-        private bool _desiredJump, _onGround, _isJumping, _isJumpReset, _ceilingEdgeDetected;
+        [SerializeField] private bool _isJumping;
+
+        private bool _desiredJump, _onGround, _isJumpReset, _ceilingEdgeDetected;
         private bool _isDashing = false;
 
 
@@ -52,7 +54,7 @@ namespace BBE
             }
             _velocity = _body.velocity;
 
-            if ((_onGround || _isDashing) && _body.velocity.y == 0)
+            if (((_onGround) && _body.velocity.y == 0) || _isDashing)
             {
                 _jumpPhase = 0;
                 _coyoteCounter = _coyoteTime;
@@ -115,6 +117,12 @@ namespace BBE
 
         private void JumpAction()
         {
+            if (_isDashing)
+            {
+                _dashInput.StopDash();
+            }
+            
+
             if (_coyoteCounter > 0f || (_jumpPhase < _maxAirJumps && _isJumping))
             {
                 if (_isJumping)
@@ -124,7 +132,7 @@ namespace BBE
 
                 _coyoteCounter = 0;
                 _jumpBufferCounter = 0;
-                _jumpSpeed = Mathf.Sqrt(-2f * Physics2D.gravity.y * _jumpHeight);
+                _jumpSpeed = Mathf.Sqrt(-2f * Physics2D.gravity.y * _jumpHeight); 
                 _isJumping = true;
 
                 if (_velocity.y > 0f)

@@ -2182,6 +2182,7 @@ MonoBehaviour:
   _upwardMovementMultiplier: 1.8
   _coyoteTime: 0.275
   _jumpBufferTime: 0.125
+  _isJumping: 0
 --- !u!68 &249796739
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -2250,11 +2251,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _activateWallSlide: 1
   _wallSlideMaxSpeed: 5
-  _wallStickTime: 0.15
+  _wallStickTime: 0.085
   _activateWallJump: 1
   _wallJumpClimb: {x: 6.2, y: 12}
   _wallJumpBounce: {x: 10.7, y: 12}
   _wallJumpLeap: {x: 14, y: 14}
+  _wallJumpBufferTime: 0.1
 --- !u!114 &249796742
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2327,7 +2329,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _duration: 7
+  _duration: 8
   _yOffset: 2.5
   _clampMinValues: {x: -100, y: -2}
   _clampMaxValues: {x: 100, y: 100}
@@ -2346,14 +2348,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dashSpeed: 18
-  _dashTime: 0.35
-  _dashCooldownTime: 0.2
+  _dashTime: 0.375
+  _dashCooldownTime: 0.08
   _scaleReductionMultiplier: 0.5
-  _desiredJump: 0
-  _desiredDash: 0
-  _canDash: 0
-  _onGround: 0
-  _wasGrounded: 0
 --- !u!1 &257365421
 GameObject:
   m_ObjectHideFlags: 0

@@ -124,6 +124,39 @@
                 },
                 {
                     "name": "",
+                    "id": "b95aee39-4b79-4686-a797-43c44799548a",
+                    "path": "<Keyboard>/x",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "401553b4-cd70-4362-81f4-01a0baef3b5b",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ba6bf582-6322-4c5c-8014-e4c708fc6796",
+                    "path": "<Keyboard>/upArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "5dcffcf0-9dc8-4671-a719-b4c749fb81fb",
                     "path": "<Gamepad>/buttonSouth",
                     "interactions": "",
@@ -137,6 +170,17 @@
                     "name": "",
                     "id": "f32787e6-6c64-48ae-b717-31ac72b3f7f9",
                     "path": "<Keyboard>/shift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Dash",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "311e88a1-cef3-4c3b-968e-83e97579bcdb",
+                    "path": "<Keyboard>/z",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

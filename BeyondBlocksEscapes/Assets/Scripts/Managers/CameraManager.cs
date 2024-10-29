@@ -15,7 +15,7 @@ namespace BBE
         private Rigidbody2D _body;
         private Controller _controller;
         private CollisionDataRetrieval _collisionDataRetriever;
-        private float _direction, _hInput, _elapsedTime, _normalizedTime, _t;
+        private float _direction, _hInput, _elapsedTime, _normalizedTime, _t, _tempInput;
         [SerializeField] private Vector2 _clampMinValues, _clampMaxValues;
         [SerializeField] private Vector3 _staticPosition;
         private Vector3 _dampPoint, _defaultPosition;
@@ -78,17 +78,18 @@ namespace BBE
 
             if (_isMoving)
             {
-                _camera.transform.position = Vector3.Lerp(_camera.transform.position, _dampPoint, _t);
-
-                if (_hInput == 0) 
+                if (_tempInput != _hInput)
                 {
-                    _isMoving = false;
-
-                    if (_collisionDataRetriever.OnGround)
-                    { 
-                        _elapsedTime = 0;
+                    _elapsedTime = 0;
+                    if (_hInput == 0)
+                    {
+                        _isMoving = false;
                     }
                 }
+
+                _camera.transform.position = Vector3.Lerp(_camera.transform.position, _dampPoint, _t);
+
+                _tempInput = _hInput;
             }
             else 
             { 
