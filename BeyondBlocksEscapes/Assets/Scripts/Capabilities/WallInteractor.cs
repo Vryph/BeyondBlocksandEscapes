@@ -17,7 +17,9 @@ namespace BBE {
         [SerializeField] private Vector2 _wallJumpLeap = new Vector2(14f, 12f);
         [SerializeField, Range(0f, 0.4f)] private float _wallJumpBufferTime = 0.15f;
 
-
+        [Header("Animation")]
+        [SerializeField] private SquashAndStretch _wallJumpSquashAndStretch;
+        [SerializeField] private ParticleSystem _wallSlideParticle;
 
         private CollisionDataRetrieval _collisionDataRetriever;
         private Rigidbody2D _body;
@@ -70,6 +72,7 @@ namespace BBE {
                 {
                     _velocity.y = -_wallSlideMaxSpeed;
                 }
+                _wallSlideParticle.Play();
             }
             #endregion
 
@@ -134,6 +137,9 @@ namespace BBE {
 
                     WallJumping = true;
                     _wallJumpBufferCounter = 0;
+
+                    if (_wallJumpSquashAndStretch != null)
+                        _wallJumpSquashAndStretch.PlaySquashAndStretch();
 
                     if (_controller.input.RetrieveMoveInput() == 0)
                     {

@@ -11,6 +11,9 @@ namespace BBE
 
         [SerializeField] private float _scaleReductionMultiplier = 0.5f;
 
+        [Header("Animation")]
+        [SerializeField] private SquashAndStretch _dashSquashAndStretch;
+
         private Controller _controller;
         private Rigidbody2D _body;
         private CollisionDataRetrieval _collisionDataRetriever;
@@ -49,6 +52,9 @@ namespace BBE
                 _canDash = false;
                 _isDashReset = false;
                 IsDashing = true;
+
+                if (_dashSquashAndStretch != null)
+                    _dashSquashAndStretch.PlaySquashAndStretch(); // Has to play the animation here, I know it isn't good
             }
             else if (!_desiredDash)
             {
@@ -71,7 +77,6 @@ namespace BBE
 
         private void DashAction()
         {
-            
             if (_dashCounter > 0)
             {
                 if (_originalScale == transform.localScale)

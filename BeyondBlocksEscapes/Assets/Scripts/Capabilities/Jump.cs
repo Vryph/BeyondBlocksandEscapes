@@ -5,6 +5,7 @@ namespace BBE
     [RequireComponent(typeof(Controller))]
     public class Jump : MonoBehaviour
     {
+        [Header("Jump Parameters")]
         [SerializeField, Range(0f, 100f)] private float _jumpHeight = 3f;
         [SerializeField, Range(0, 5)] private int _maxAirJumps = 0;
         [SerializeField, Range(0f, 5f)] private float _downwardMovementMultiplier = 3f;
@@ -12,6 +13,12 @@ namespace BBE
         [SerializeField, Range(0, 0.4f)] private float _coyoteTime = 0.2f;
         [SerializeField, Range(0, 0.4f)] private float _jumpBufferTime = 0.2f;
 
+        [Header("Graphics")]
+        [SerializeField] private SquashAndStretch _landingSquashAndStretch;
+        [SerializeField] private SquashAndStretch _jumpSquashAndStretch;
+        [SerializeField] private ParticleSystem _landingParticles;
+
+        
         private Controller _controller;
         private Dash _dashInput;
         private Rigidbody2D _body;
@@ -22,9 +29,10 @@ namespace BBE
         private int _jumpPhase;
         private float _defaultGravityScale, _jumpSpeed, _coyoteCounter, _jumpBufferCounter;
 
+        [Header("Debug")]
         [SerializeField] private bool _isJumping;
 
-        private bool _desiredJump, _onGround, _isJumpReset, _ceilingEdgeDetected;
+        private bool _desiredJump, _onGround, _isJumpReset, _ceilingEdgeDetected, _wasGrounded;
         private bool _isDashing = false;
 
 
@@ -48,10 +56,20 @@ namespace BBE
         private void FixedUpdate()
         {
             _onGround = _collisionDataRetriever.OnGround;
+            if (_onGround && !_wasGrounded)
+            {
+                if(_landingSquashAndStretch != null)
+                    _landingSquashAndStretch.PlaySquashAndStretch();
+                if (_landingParticles != null)
+                    _landingParticles.Play();
+            }
+
             if (_dashInput != null)
             {
                 _isDashing = _dashInput.IsDashing;
             }
+
+
             _velocity = _body.velocity;
 
             if (((_onGround) && _body.velocity.y == 0) || _isDashing)
@@ -113,7 +131,10 @@ namespace BBE
             _body.velocity = _velocity;
         }
 
-
+        private void LateUpdate()
+        {
+            _wasGrounded = _onGround;
+        }
 
         private void JumpAction()
         {
@@ -134,6 +155,8 @@ namespace BBE
                 _jumpBufferCounter = 0;
                 _jumpSpeed = Mathf.Sqrt(-2f * Physics2D.gravity.y * _jumpHeight); 
                 _isJumping = true;
+                if(_jumpSquashAndStretch != null)
+                    _jumpSquashAndStretch.PlaySquashAndStretch();
 
                 if (_velocity.y > 0f)
                 {

@@ -23,7 +23,10 @@ namespace BBE
         private Rigidbody2D _body;
         private CollisionDataRetrieval _collisionDataRetriever;
         private RaycastDataRetrieval _raycastDataRetriever;
-        private ParticleSystem _moveParticleSystem;
+
+        [Header("Particles")]
+        [SerializeField]private ParticleSystem _moveParticleSystem;
+        [SerializeField]private ParticleSystem _wallParticleSystem;
 
         private float _maxSpeedChange, _acceleration, _particleCounter;
         private bool _onGround, _facingRight, _ceilingEdgeDetected;
@@ -36,7 +39,6 @@ namespace BBE
             _collisionDataRetriever = GetComponent<CollisionDataRetrieval>();
             _raycastDataRetriever = GetComponent<RaycastDataRetrieval>();
             _controller = GetComponent<Controller>();
-            _moveParticleSystem = GetComponentInChildren<ParticleSystem>();
         }
 
         private void Update()
@@ -69,15 +71,21 @@ namespace BBE
 
             #region Temp Particles
             // Really need to move this code out of here eventually
-            if (_velocity.x < 0f && _facingRight)
+            if (_direction.x < 0f && _facingRight)
             {
-                _moveParticleSystem.transform.rotation *= Quaternion.Euler(0, 180, 0);
+                if(_moveParticleSystem != null)
+                    _moveParticleSystem.transform.rotation *= Quaternion.Euler(0, 180, 0);
+                if (_wallParticleSystem != null)
+                    _wallParticleSystem.transform.rotation *= Quaternion.Euler(0, 180, 0);
                 _facingRight = false;
 
             }
-            else if (_velocity.x > 0 && !_facingRight)
+            else if (_direction.x > 0 && !_facingRight)
             {
-                _moveParticleSystem.transform.rotation *= Quaternion.Euler(0, 180, 0);
+                if(_moveParticleSystem !=  null)
+                    _moveParticleSystem.transform.rotation *= Quaternion.Euler(0, 180, 0);
+                if(_wallParticleSystem != null)
+                    _wallParticleSystem.transform.rotation *= Quaternion.Euler(0, 180, 0);
                 _facingRight = true;
             }
 
@@ -86,8 +94,11 @@ namespace BBE
             {
                 if (_particleCounter > _particleFormationPeriod)
                 {
-                    _moveParticleSystem.Play();
-                    _particleCounter = 0;
+                    if (!_isDashing)
+                    {
+                        _moveParticleSystem.Play();
+                        _particleCounter = 0;
+                    }
                 }
             }
 
