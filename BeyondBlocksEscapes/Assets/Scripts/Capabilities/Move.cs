@@ -18,6 +18,7 @@ namespace BBE
         [SerializeField, Range(0.005f, 0.5f)] private float _ceilingEdgeCorrectionIntensity = 0.1f; //Can just be the same value as Raylenght from raycastDataRetrieval.
 
         private Controller _controller;
+        private CameraManager _cameraManager;
         private Dash _dashInput;
         private Vector2 _direction, _desiredVelocity, _velocity;
         private Rigidbody2D _body;
@@ -26,14 +27,15 @@ namespace BBE
 
         [Header("Particles")]
         [SerializeField]private ParticleSystem _moveParticleSystem;
-        [SerializeField]private ParticleSystem _wallParticleSystem;
 
         private float _maxSpeedChange, _acceleration, _particleCounter;
         private bool _onGround, _facingRight, _ceilingEdgeDetected;
         private bool _isDashing = false;
+        public bool ShouldLock = false, IsLocked = false;
 
         private void Awake()
         {
+            _cameraManager = GetComponent<CameraManager>(); 
             _body = GetComponent<Rigidbody2D>();
             _dashInput = GetComponent<Dash>();
             _collisionDataRetriever = GetComponent<CollisionDataRetrieval>();
@@ -43,6 +45,9 @@ namespace BBE
 
         private void Update()
         {
+            if(_onGround && ShouldLock)
+                FreezeCharacter();
+
             _particleCounter += Time.deltaTime;
             _direction.x = _controller.input.RetrieveMoveInput();
             _desiredVelocity = new Vector2(_direction.x, 0f) * Mathf.Max(_maxSpeed - _collisionDataRetriever.Friction, 0f);
@@ -55,6 +60,12 @@ namespace BBE
         private void FixedUpdate()
         {
             if(_dashInput != null) { _isDashing = _dashInput.IsDashing;}
+            if (_isDashing)
+                _moveParticleSystem.transform.localScale = new Vector3(1, 0.5f, 1); //If I ever Change the ScaleReduction Multiplier I need to adjust this.
+            else
+                _moveParticleSystem.transform.localScale = new Vector3(1, 1, 1);
+
+
             _onGround = _collisionDataRetriever.OnGround;
             _velocity = _body.velocity;
             _ceilingEdgeDetected = _raycastDataRetriever.CeilingEdgeDetected;
@@ -75,8 +86,6 @@ namespace BBE
             {
                 if(_moveParticleSystem != null)
                     _moveParticleSystem.transform.rotation *= Quaternion.Euler(0, 180, 0);
-                if (_wallParticleSystem != null)
-                    _wallParticleSystem.transform.rotation *= Quaternion.Euler(0, 180, 0);
                 _facingRight = false;
 
             }
@@ -84,8 +93,6 @@ namespace BBE
             {
                 if(_moveParticleSystem !=  null)
                     _moveParticleSystem.transform.rotation *= Quaternion.Euler(0, 180, 0);
-                if(_wallParticleSystem != null)
-                    _wallParticleSystem.transform.rotation *= Quaternion.Euler(0, 180, 0);
                 _facingRight = true;
             }
 
@@ -94,11 +101,8 @@ namespace BBE
             {
                 if (_particleCounter > _particleFormationPeriod)
                 {
-                    if (!_isDashing)
-                    {
-                        _moveParticleSystem.Play();
-                        _particleCounter = 0;
-                    }
+                     _moveParticleSystem.Play();
+                     _particleCounter = 0;
                 }
             }
 
@@ -111,6 +115,25 @@ namespace BBE
             }
 
             _body.velocity = _velocity;  //This line should be the last thing on the update 99% of the time, otherwise it would be part of Handle Movement
+        }
+
+        public void FreezeCharacter()
+        {
+            ShouldLock = false;
+            IsLocked = !IsLocked;
+            
+            if (IsLocked)
+            {
+                _body.constraints = RigidbodyConstraints2D.FreezePosition;
+                _cameraManager.enabled = false;
+                _dashInput.enabled = false;
+            }
+            else
+            {
+                _body.constraints = RigidbodyConstraints2D.FreezeRotation;
+                _cameraManager.enabled = true;
+                _dashInput.enabled = true;
+            }
         }
     }
 }

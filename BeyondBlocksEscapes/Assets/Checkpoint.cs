@@ -1,26 +1,31 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace BBE
 {
     public class Checkpoint : MonoBehaviour
     {
-        private BoxCollider2D _collider;
+        public bool HasTriggered = false;
+        public int Id { private get; set; }
 
-        [SerializeField] private TempLapManager _tempLapManager;
-
-        private void Awake()
-        {
-           _collider = GetComponent<BoxCollider2D>();
-        
-        }
+        [SerializeField] private Checkpoint _checkpointPair;
 
         private void OnTriggerEnter2D(Collider2D collision)
         {
-            if(_tempLapManager._checkpointTrigger == false)
+            if (collision.GetType().ToString() == "UnityEngine.BoxCollider2D")
             {
-                _tempLapManager._checkpointTrigger = true;
+                switch (Id)
+                {
+                    case 0:
+                        if (!_checkpointPair.HasTriggered)
+                        {
+                            HasTriggered = true;
+                        }
+                        break;
+                    case 1:
+                        HasTriggered = !HasTriggered;
+                        break;
+                    default: break;
+                }
             }
         }
     }

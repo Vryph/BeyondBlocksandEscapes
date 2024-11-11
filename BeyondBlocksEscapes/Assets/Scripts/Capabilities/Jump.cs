@@ -72,7 +72,7 @@ namespace BBE
 
             _velocity = _body.velocity;
 
-            if (((_onGround) && _body.velocity.y == 0) || _isDashing)
+            if ((_onGround && Mathf.Abs(_body.velocity.y) <= 0.001) || _isDashing)
             {
                 _jumpPhase = 0;
                 _coyoteCounter = _coyoteTime;

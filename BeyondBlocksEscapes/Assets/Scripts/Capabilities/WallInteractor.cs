@@ -27,8 +27,8 @@ namespace BBE {
         private Dash _dash;
 
         private Vector2 _velocity;
-        private bool _onWall, _onGround, _desiredJump, _isJumpReset;
-        private float _wallStickCounter, _wallJumpBufferCounter;
+        private bool _onWall, _onGround, _desiredJump, _isJumpReset, _facingRight;
+        private float _wallStickCounter, _wallJumpBufferCounter, _particleDirectionAngle;
         [HideInInspector] public bool WallJumping { get; private set; }
         private float _wallDirectionX;
 
@@ -65,6 +65,13 @@ namespace BBE {
             }
 
             #region Wall Slide
+            _facingRight = _controller.input.RetrieveMoveInput() > 0 ? true : false;
+
+
+            if (_wallSlideParticle != null && !_onWall)
+                _particleDirectionAngle = _facingRight ? 180 : 0;
+            _wallSlideParticle.transform.rotation = Quaternion.Euler(0, _particleDirectionAngle, 0);
+
             if (_onWall && _activateWallSlide)
             {
                 _dash.ResetDash();

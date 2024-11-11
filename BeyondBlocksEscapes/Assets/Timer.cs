@@ -6,7 +6,7 @@ namespace BBE
 {
     public class Timer : MonoBehaviour
     {
-        [SerializeField] private TempLapManager _manager;
+        [SerializeField] private RaceManager _manager;
         private TextMeshProUGUI _text;
 
         private void Awake()
