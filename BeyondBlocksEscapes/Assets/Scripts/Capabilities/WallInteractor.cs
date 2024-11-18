@@ -20,6 +20,8 @@ namespace BBE {
         [Header("Animation")]
         [SerializeField] private SquashAndStretch _wallJumpSquashAndStretch;
         [SerializeField] private ParticleSystem _wallSlideParticle;
+        [SerializeField] private AudioSource _wallSlideAudioSource;
+        [SerializeField] private AudioClip _wallSlideAudioClip;
 
         private CollisionDataRetrieval _collisionDataRetriever;
         private Rigidbody2D _body;
@@ -27,13 +29,18 @@ namespace BBE {
         private Dash _dash;
 
         private Vector2 _velocity;
-        private bool _onWall, _onGround, _desiredJump, _isJumpReset, _facingRight;
+        private bool _onWall, _onGround, _desiredJump, _isJumpReset, _facingRight,_wasOnWall;
         private float _wallStickCounter, _wallJumpBufferCounter, _particleDirectionAngle;
         [HideInInspector] public bool WallJumping { get; private set; }
         private float _wallDirectionX;
 
         private void Start()
         {
+            _wallSlideAudioSource = GetComponent<AudioSource>();
+            _wallSlideAudioSource.loop = true;
+            _wallSlideAudioSource.clip = _wallSlideAudioClip;
+            _wallSlideAudioSource.volume = 0.35f;
+
             _collisionDataRetriever = GetComponent<CollisionDataRetrieval>();
             _body = GetComponent<Rigidbody2D>();
             _controller = GetComponent<Controller>();
@@ -56,13 +63,28 @@ namespace BBE {
             _onGround = _collisionDataRetriever.OnGround;
             _wallDirectionX = _collisionDataRetriever.ContactNormal.x;
 
+
+
+
             if (_onWall)
             {
+                if(!_wallSlideAudioSource.isPlaying)
+                     _wallSlideAudioSource.PlayDelayed(0.08f);
+
                 if (_dash.IsDashing)
                 {
                     _dash.StopDash();
+                    SoundManager.PlaySound(SoundType.WallHit, 1.3f);
+                }
+
+                if (!_wasOnWall)
+                {
+                    SoundManager.PlaySound(SoundType.WallTouch, 0.85f);
                 }
             }
+            else
+                _wallSlideAudioSource.Stop();
+
 
             #region Wall Slide
             _facingRight = _controller.input.RetrieveMoveInput() > 0 ? true : false;
@@ -139,7 +161,7 @@ namespace BBE {
                 {
                     if (_dash.IsDashing)
                     {
-                        _dash.StopDash();
+                        _dash.StopDash();   
                     }
 
                     WallJumping = true;
@@ -147,6 +169,7 @@ namespace BBE {
 
                     if (_wallJumpSquashAndStretch != null)
                         _wallJumpSquashAndStretch.PlaySquashAndStretch();
+                    SoundManager.PlaySound(SoundType.Jump, 0.85f);
 
                     if (_controller.input.RetrieveMoveInput() == 0)
                     {
@@ -165,7 +188,10 @@ namespace BBE {
 
             #endregion
 
+            _wasOnWall = _onWall;
+
             _body.velocity = _velocity;
+
         }
 
         private void OnCollisionEnter2D(Collision2D collision)

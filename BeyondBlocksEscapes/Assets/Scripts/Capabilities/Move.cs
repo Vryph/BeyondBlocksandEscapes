@@ -1,4 +1,6 @@
+using System.Net;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace BBE
 {
@@ -13,6 +15,7 @@ namespace BBE
         [Header("Move Particles")]
         [SerializeField, Range(0, 0.2f)] float _particleFormationPeriod;
         [SerializeField, Range(0, 5)] float _particleSpeedThreshold;
+        [SerializeField, Range(0, 100)] float _stepSoundPercentageChance = 5;
 
         [Header("Ceiling Edge Detection")]
         [SerializeField, Range(0.005f, 0.5f)] private float _ceilingEdgeCorrectionIntensity = 0.1f; //Can just be the same value as Raylenght from raycastDataRetrieval.
@@ -29,9 +32,9 @@ namespace BBE
         [SerializeField]private ParticleSystem _moveParticleSystem;
 
         private float _maxSpeedChange, _acceleration, _particleCounter;
-        private bool _onGround, _facingRight, _ceilingEdgeDetected;
+        private bool _onGround, _facingRight, _ceilingEdgeDetected, _dashEdgeDetected;
         private bool _isDashing = false;
-        public bool ShouldLock = false, IsLocked = false;
+        public bool ShouldSwitchLockState = false, IsLocked = false;
 
         private void Awake()
         {
@@ -45,7 +48,10 @@ namespace BBE
 
         private void Update()
         {
-            if(_onGround && ShouldLock)
+            _raycastDataRetriever.CeilingEdgeDetection();
+            _raycastDataRetriever.DashEdgeDetection();
+
+            if(_onGround && ShouldSwitchLockState)
                 FreezeCharacter();
 
             _particleCounter += Time.deltaTime;
@@ -69,6 +75,7 @@ namespace BBE
             _onGround = _collisionDataRetriever.OnGround;
             _velocity = _body.velocity;
             _ceilingEdgeDetected = _raycastDataRetriever.CeilingEdgeDetected;
+            _dashEdgeDetected = _raycastDataRetriever.DashEdgeDetected;
 
             #region Handle Movement
 
@@ -104,14 +111,23 @@ namespace BBE
                      _moveParticleSystem.Play();
                      _particleCounter = 0;
                 }
+
+                float random = UnityEngine.Random.Range(0, 100);
+                if (random <= _stepSoundPercentageChance)
+                    SoundManager.PlaySound(SoundType.Step, 0.6f);
             }
 
             #endregion
                 
             if (_velocity.x != 0) { _raycastDataRetriever.SetDirection(); } // Handles the direction in the Raycast code
-            if (_ceilingEdgeDetected)
+            if (_ceilingEdgeDetected && !_onGround && !_isDashing)
             {
-                _body.transform.position += new Vector3(_ceilingEdgeCorrectionIntensity * (_facingRight ? 1 : -1), 0, 0); // Will break when I change the particles
+                _body.transform.position += new Vector3((_raycastDataRetriever.CeilingDistance + 0.05f) * (_facingRight ? 1 : -1), 0, 0); // Will break when I change the particles
+            }
+            else if (_dashEdgeDetected && _isDashing && !_onGround)
+            {
+                Debug.Log("Dash Corrected");
+                _body.transform.position += new Vector3(0, _raycastDataRetriever.DashDistance + 0.05f, 0);
             }
 
             _body.velocity = _velocity;  //This line should be the last thing on the update 99% of the time, otherwise it would be part of Handle Movement
@@ -119,7 +135,7 @@ namespace BBE
 
         public void FreezeCharacter()
         {
-            ShouldLock = false;
+            ShouldSwitchLockState = false;
             IsLocked = !IsLocked;
             
             if (IsLocked)

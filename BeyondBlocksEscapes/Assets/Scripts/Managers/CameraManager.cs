@@ -80,9 +80,9 @@ namespace BBE
             {
                 if (_tempInput != _hInput)
                 {
-                    _elapsedTime = 0;
                     if (_hInput == 0)
                     {
+                        _elapsedTime = 0;
                         _isMoving = false;
                     }
                 }

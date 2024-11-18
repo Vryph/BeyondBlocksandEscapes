@@ -12,6 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 168d444fd82e384458885133d9864752, type: 3}
   m_Name: Leaderboard
   m_EditorClassIdentifier: 
-  RaceCompletionTimes: []
-  LapCompletionTimes: []
+  RaceCompletionTimes:
+  - 184.71169
+  LapCompletionTimes:
+  - 63.97
+  - 60.41
+  - 60.32
+  UsernameRaceCompletionList:
+  - Vryph(DEV)
+  UsernameLapCompletionList:
+  - Vryph(DEV)
+  - Vryph(DEV)
+  - Vryph(DEV)
+  CurrentUsername: 
   GameMode: 1

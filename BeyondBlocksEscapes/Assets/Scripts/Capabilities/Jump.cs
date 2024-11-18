@@ -21,6 +21,7 @@ namespace BBE
         
         private Controller _controller;
         private Dash _dashInput;
+        private Move _move;
         private Rigidbody2D _body;
         private CollisionDataRetrieval _collisionDataRetriever;
         private RaycastDataRetrieval _raycastDataRetriever;
@@ -38,6 +39,7 @@ namespace BBE
 
         private void Awake()
         {
+            _move = GetComponent<Move>();
             _body = GetComponent<Rigidbody2D>();
             _dashInput = GetComponent<Dash>();
             _collisionDataRetriever = GetComponent<CollisionDataRetrieval>();
@@ -62,6 +64,7 @@ namespace BBE
                     _landingSquashAndStretch.PlaySquashAndStretch();
                 if (_landingParticles != null)
                     _landingParticles.Play();
+                SoundManager.PlaySound(SoundType.Fall, 1.2f);
             }
 
             if (_dashInput != null)
@@ -72,7 +75,7 @@ namespace BBE
 
             _velocity = _body.velocity;
 
-            if ((_onGround && Mathf.Abs(_body.velocity.y) <= 0.001) || _isDashing)
+            if ((_onGround && Mathf.Abs(_body.velocity.y) <= 0.01) || _isDashing)
             {
                 _jumpPhase = 0;
                 _coyoteCounter = _coyoteTime;
@@ -144,7 +147,7 @@ namespace BBE
             }
             
 
-            if (_coyoteCounter > 0f || (_jumpPhase < _maxAirJumps && _isJumping))
+            if ((_coyoteCounter > 0f || (_jumpPhase < _maxAirJumps && _isJumping)) && !_move.IsLocked)
             {
                 if (_isJumping)
                 {
@@ -157,6 +160,7 @@ namespace BBE
                 _isJumping = true;
                 if(_jumpSquashAndStretch != null)
                     _jumpSquashAndStretch.PlaySquashAndStretch();
+                SoundManager.PlaySound(SoundType.Jump, 0.85f);
 
                 if (_velocity.y > 0f)
                 {

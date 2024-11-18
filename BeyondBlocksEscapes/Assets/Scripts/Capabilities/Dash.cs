@@ -54,7 +54,8 @@ namespace BBE
                 IsDashing = true;
 
                 if (_dashSquashAndStretch != null)
-                    _dashSquashAndStretch.PlaySquashAndStretch(); // Has to play the animation here, I know it isn't good
+                    _dashSquashAndStretch.PlaySquashAndStretch(); // Has to play the animation here, I know it isn't good - I reget how I made this dash work
+                SoundManager.PlaySound(SoundType.Dash, 0.65f);
             }
             else if (!_desiredDash)
             {
